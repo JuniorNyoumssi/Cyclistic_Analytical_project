@@ -1,0 +1,529 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+
+# Cyclistic is a successful bike_share offering company which has the desire to convert Casual users of bikes into annual members due to the fact that Annual members are more profitable than casual member. The business goal is therefore to convert as many casual users into annual members. As part of the goal attainment , the duty that was assigned to me is to identify How annual members and casual riders use Cyclist bike differently.
+
+#Therefore with the data sets I have, I will be using R studio to carry out data cleaning ,Exploratory data analysis and Explanatory
+#data analysis, to be able to identify trends in the data, and develop powerful insights using clear dashboards that will drive desicion making.
+
+
+install.packages('tidyverse')
+install.packages('RMySQL')
+library(DBI)
+library(RMySQL)
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+install.packages("writexl")
+library(writexl)
+
+df_202301<- read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202301-divvy-tripdata.csv")
+df_202302<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202302-divvy-tripdata.csv")
+df_202303<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202303-divvy-tripdata.csv")
+df_202304<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202304-divvy-tripdata.csv")
+df_202305<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202305-divvy-tripdata.csv")
+df_202306<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202306-divvy-tripdata.csv")
+df_202307<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202307-divvy-tripdata.csv")
+df_202308<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202308-divvy-tripdata.csv")
+df_202309<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202309-divvy-tripdata.csv")
+df_202310<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202310-divvy-tripdata.csv")
+df_202311<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202311-divvy-tripdata.csv")
+df_202312<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202312-divvy-tripdata.csv")
+
+#view(df_202301)
+
+# DATASETS MERGING
+
+union_table <- bind_rows(df_202301,df_202302,df_202303,df_202304,df_202305,df_202306,df_202307,df_202308,df_202309,df_202310,df_202311,df_202312)
+
+# Identify datatype of the columns
+
+#glimpse(union_table)
+
+#Coverting member_casual into Factor data type
+
+union_table$member_casual <- as.factor(union_table$member_casual)
+class(union_table$member_casual)
+
+# Separating the time portion from the date portion in the started at and ended 
+#at columns
+
+union_table <- union_table %>% separate(started_at,into = c("start_date","start_time"),
+                                        sep=" ")
+union_table <- union_table %>% separate(ended_at,into = c("end_date","end_time"),
+                                        sep=" ")
+
+
+
+#Creating day_of_week column from the start_date column into dataset
+
+union_table<- union_table %>% mutate(day_of_week=weekdays(as.Date(start_date)))
+
+#Creating a season column from start_date column
+
+union_table <- union_table %>% mutate(season=case_when(between(as.Date(start_date),
+                as.Date("2023-03-01"),
+                as.Date("2023-05-31"))~"Spring",
+                between(as.Date(start_date),
+                as.Date("2023-06-01"),
+                as.Date("2023-08-31"))~"Summer",
+                between(as.Date(start_date),
+                as.Date("2023-09-01"),
+                as.Date("2023-11-30"))~"Fall",
+                TRUE ~ "Winter" 
+                ))
+
+#Changing the size of the column names
+
+union_table <- rename_with(union_table,toupper)
+#view(union_table %>% slice(1:5))
+
+#Creating a new table and droppung duplicates
+
+union_table1<- union_table %>%  distinct()
+
+#Dropping all the na_values
+
+union_table1 <- union_table1 %>% drop_na()
+
+union_table1 <- union_table1 %>% filter(complete.cases(.))
+
+
+#Filter out those RIDE_ID with lengths not equal to 16
+
+union_table1 <- union_table1 %>% filter(nchar(RIDE_ID)==16)
+
+
+#Converting the Time columns from character to time data type
+
+union_table1 <- union_table1 %>% mutate(END_TIME =as.POSIXct(END_TIME,format="%H:%M:%S"))
+union_table1 <- union_table1 %>%mutate(START_TIME=as.POSIXct(START_TIME,format="%H:%M:%S"))
+union_table1 <- union_table1 %>% mutate(time_diff=difftime(END_TIME,START_TIME,units="mins"))
+
+
+
+#view(union_table1 %>% slice(1:5))
+
+# Separating the time portion from the date portion in the START_TIME and END_TIME 
+#at columns
+union_table1 <- union_table1 %>% separate(START_TIME,into = c("start_date","start_time"),
+                                        sep=" ")
+union_table1 <- union_table1 %>% separate(END_TIME,into = c("end_date","end_time"),
+                                        sep=" ")
+
+
+#view(union_table1 %>% slice(1:5))
+class(union_table1$time_diff)
+
+#Deleting Columns start_date and end_date from table
+
+union_table1 <- union_table1 %>% select(-start_date,-end_date)
+union_table1 <- rename_with(union_table1,toupper)
+
+#Calculating the week day frequencies and creating a column DAY_COUNTS to store the frequencies as per the membership_type
+
+union_table2 <- union_table1%>%group_by(MEMBER_CASUAL,DAY_OF_WEEK)%>%count(RIDE_ID,name="RIDE_NUMBER_WEEKDAY")
+#view(union_table2)
+
+
+#UN_TB_FIN <- union_table1 %>% mutate(DAY_COUNTS = case_when(MEMBER_CASUAL=="member"&DAY_OF_WEEK=="Friday"~531432,
+#                                       MEMBER_CASUAL=="member"&DAY_OF_WEEK=="Monday"~494435,
+#                                       MEMBER_CASUAL=="member" & DAY_OF_WEEK=="Tuesday"~576588,
+#                                       MEMBER_CASUAL=="member"&DAY_OF_WEEK=="Wednesday"~586294,
+#                                       MEMBER_CASUAL=="member" &DAY_OF_WEEK=="Thursday"~589420,
+#                                       MEMBER_CASUAL=="member" &DAY_OF_WEEK=="Saturday"~472696,
+#                                       MEMBER_CASUAL=="member" & DAY_OF_WEEK=="Sunday"~408715,
+#                                       MEMBER_CASUAL=="casual" & DAY_OF_WEEK=="Friday"~311081,
+#                                       MEMBER_CASUAL=="casual" & DAY_OF_WEEK=="Monday"~234198,
+#                                       MEMBER_CASUAL=="casual" &DAY_OF_WEEK=="Tuesday"~245604,
+#                                       MEMBER_CASUAL=="casual"&DAY_OF_WEEK=="Wednesday"~248568,
+#                                       MEMBER_CASUAL=="casual"&DAY_OF_WEEK=="Thursday"~269916,
+#                                       MEMBER_CASUAL=="casual"&DAY_OF_WEEK=="Saturday"~409415,
+#                                       MEMBER_CASUAL=="casual"&DAY_OF_WEEK=="Sunday"~334525))
+
+
+
+#view(UN_TB_FIN %>% slice(1:20))
+
+#Exporting dataset into CSV format
+
+#write.csv(UN_TB_FIN,"C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/Full_dataset1.csv",row.names=FALSE)  
+
+
+#UN_TBFN_1 <- as.data.frame(UN_TB_FIN)
+#write_xlsx(UN_TBFN_1,path ="C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/" )
+
+# MEMBERS
+
+
+#Filtering the dataframe and seperating it into two separate frames for further analysis and comparison
+
+UNI_Member <-UN_TB_FIN %>% filter(MEMBER_CASUAL=="member")
+#view(UNI_Member %>% slice(1:20))
+UNI_Member %>%summarize()
+#UNI_Member %>% skim_without_charts()
+
+#Total Count of Members is 3659580
+total_rows <- nrow(UNI_Member)
+total_rows
+
+# Mean time traveled per ride by Members is 8.245793 mins
+Mean_Timetraveled_per_ride <- summarise(UNI_Member,mean(TIME_DIFF))
+Mean_Timetraveled_per_ride
+
+# Maximum time traveled by a member is 1356.1 mins
+Max_Timetraveled_per_ride <- summarise(UNI_Member,max(TIME_DIFF))
+Max_Timetraveled_per_ride
+
+# Minimum time traveled by a member -
+Min_Timetraveled_per_ride <- summarise(UNI_Member,min(TIME_DIFF))
+Min_Timetraveled_per_ride
+
+#Ride count by week day
+
+
+weekday_frequency <- UNI_Member %>%  group_by(DAY_OF_WEEK) %>% count(DAY_OF_WEEK)
+weekday_frequency %>%  arrange(.,n)
+
+
+    # RESULTS
+#Sunday	    408715			
+#Saturday	  472696			
+#Monday	    494435			
+#Friday	    531432			
+#Tuesday	  576588			
+#Wednesday	586294			
+#Thursday	  589420			
+
+
+
+#Ride count by RIDEABLE_TYPE grouped by week
+
+weekday_frequency_RIDES <- UNI_Member %>%  group_by(DAY_OF_WEEK,RIDEABLE_TYPE) %>% count(RIDEABLE_TYPE)
+weekday_frequency_RIDES %>%  arrange(.,n)
+
+
+       # RESULTS
+#Sunday	  electric_bike	201243		
+#Sunday	  classic_bike	207472		
+#Saturday	classic_bike	235657		
+#Saturday	electric_bike	237039		
+#Monday	  electric_bike	243708		
+#Monday	  classic_bike	250727		
+#Friday	  classic_bike	256787		
+#Friday	  electric_bike	274645		
+#Tuesday	electric_bike	286514		
+#Thursday	classic_bike	288303
+#Wednesda classic_bike	288992		
+#Tuesday	classic_bike	290074		
+#Wednesda electric_bike	297302		
+#Thursday	electric_bike	301117		
+ 
+ 
+
+
+# Ride count by SEASON
+
+Season_frequency <- UNI_Member %>%  group_by(SEASON) %>% count(SEASON)
+Season_frequency %>%  arrange(.,n)
+
+   #RESULTS
+#Winter	470006			
+#Spring	846233			
+#Fall	  1028523			
+#Summer	1314818	
+
+
+
+
+# Ride count by RIDE TYPE under each season
+# Members do not enjoy Docked bikes
+
+Season_frequency_RIDES <- UNI_Member %>%  group_by(SEASON,RIDEABLE_TYPE) %>% count(RIDEABLE_TYPE)
+Season_frequency_RIDES %>%  arrange(.,n)
+
+   # RESULTS
+
+#Winter	classic_bike	234742		
+#Winter	electric_bike	235264		
+#Spring	classic_bike	385568		
+#Spring	electric_bike	460665		
+#Fall	  electric_bike	494963		
+#Fall	  classic_bike	533560		
+#Summer	electric_bike	650676		
+#Summer	classic_bike	664142	
+
+
+#CASUALS
+
+UNI_Casual <-UN_TB_FIN %>% filter(MEMBER_CASUAL=="casual")
+#view(UNI_Casual %>% slice(1:20))
+
+
+
+UNI_Casual %>%summarize()
+
+#Total ride Count of Casuals is 2053307
+total_rows <- nrow(UNI_Casual)
+total_rows
+
+# Mean time traveled per ride by Casuals is 10.99201 mins
+Mean_Timetraveled_per_ride <- summarise(UNI_Casual,mean(TIME_DIFF))
+Mean_Timetraveled_per_ride
+
+# Maximum time traveled by a casual is 1372.95 mins	
+Max_Timetraveled_per_ride <- summarise(UNI_Casual,max(TIME_DIFF))
+Max_Timetraveled_per_ride
+
+# Minimum time traveled by a casual  - 
+Min_Timetraveled_per_ride <- summarise(UNI_Casual,min(TIME_DIFF))
+Min_Timetraveled_per_ride
+
+#Ride count by week day
+	
+weekday_frequency <- UNI_Casual %>%  group_by(DAY_OF_WEEK) %>% count(DAY_OF_WEEK)
+weekday_frequency %>%  arrange(.,n)
+
+ # RESULTS
+
+#Monday	    234198			
+#Tuesday	  245604			
+#Wednesday	248568			
+#Thursday	  269916			
+#Friday	    311081			
+#Sunday	    334525			
+#Saturday	  409415	
+
+#Ride count by ride type under each week day
+#Casual members prefer classic bikes to docked bikes
+
+
+weekday_frequency_RIDES <- UNI_Casual %>%  group_by(DAY_OF_WEEK,RIDEABLE_TYPE) %>% count(RIDEABLE_TYPE)
+weekday_frequency_RIDES %>%  arrange(.,n)
+#view(A)
+
+
+         # RESULTS
+
+#Wednesday	docked_bike	7684		
+#Tuesday	 docked_bike	8451		
+#Thursday	 docked_bike	8654		
+#Monday	  docked_bike	8895		
+#Friday	  docked_bike	11142		
+#Sunday	  docked_bike	14488		
+#Saturday	docked_bike	16810		
+#Monday	  classic_bike	96600		
+#Wednesday	classic_bike	98213		
+#Tuesday	  classic_bike	99275
+#Thursday	  classic_bike	107515		
+#Friday	    classic_bike	127229		
+#Monday	    electric_bike	128703		
+#Tuesday	  electric_bike	137878		
+#Wednesday	electric_bike	142671		
+#Thursday	  electric_bike	153747		
+#Sunday	    classic_bike	154496		
+#Sunday	    electric_bike	165541		
+#Friday	    electric_bike	172710		
+#Saturday	  classic_bike	189844
+#Saturday	  electric_bike	202761	
+
+# Ride count by SEASON
+
+Season_frequency <- UNI_Casual %>%  group_by(SEASON) %>% count(SEASON)
+Season_frequency %>%  arrange(.,n)
+
+  #RESULTS
+
+#Winter	134331			
+#Spring	442534			
+#Fall	  535699			
+#Summer	940743	
+
+
+# Ride count by Rideable type under each Season
+Season_frequency_RIDES<- UNI_Casual %>%  group_by(SEASON,RIDEABLE_TYPE) %>% count(RIDEABLE_TYPE)
+Season_frequency_RIDES %>%  arrange(.,n)
+
+   
+#RESULTS
+
+#Winter	  docked_bike	  3833		
+#Spring	  docked_bike	  24412		
+#Summer	  docked_bike	  47879		
+#Winter	  classic_bike	49642		
+#Winter	  electric_bike	80856		
+#Spring	  classic_bike	160407		
+#Fall	    classic_bike	256552		
+#Spring	  electric_bike	257715		
+#Fall	    electric_bike	279147		
+#Summer	  classic_bike	406571	
+#Summer	  electric_bike	486293	
+
+
+
+
+UN_TB_FIN <- UN_TB_FIN %>% mutate(TIME_DIFF1 = as.numeric(TIME_DIFF))
+
+class(UN_TB_FIN$TIME_DIFF1)
+
+# Identified empty rows under START_STATION_ID and END_STATION_ID columns
+
+UNi_1 <- UN_TB_FIN[UN_TB_FIN$TIME_DIFF1 < 0,]
+#view(UNi_1)
+
+# FILTER OUT THE EMPTY ROWS FROM THE TABLE UN_TB_FIN
+
+UN_TB1 <- UN_TB_FIN %>%  filter(START_STATION_ID != "" & END_STATION_ID != "")
+UN_TB1 <- UN_TB1 %>% na.omit()
+#view(UN_TB1 %>% slice(1:20))
+
+UNi_2 <- UN_TB1[UN_TB1$TIME_DIFF1 < 0,]
+#view(UNi_2)
+
+# EXPORTING INTO MULTIPLE SMALLER TABLES AS EXCEL DOESN'T ACCEPT MORE THAN 1000000 ROWS OF  DATA
+
+#smaller_tables <- split(UN_TB1,rep(1:ceiling(nrow(UN_TB1)/1000000),each=1000000,length.out=nrow(UN_TB1)))
+#num_rows <- sapply(smaller_tables,nrow)
+#print(num_rows)
+
+#for(i in 1:length(smaller_tables)){
+#  write_xlsx(smaller_tables[[i]],
+#             paste0("table_",i,".xlsx"))
+#}
+
+#UN_TBFN_1 <- as.data.frame(UN_TB_FIN)
+#write_xlsx(UN_TBFN_1,path ="C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/" )
+
+#CONVERTING THE DATATYPE OF THE TIME_DIFF COLUMN TO NUMERIC
+
+class(UN_TB1$RIDE_TIME_mins)
+UN_TB1$TIME_DIFF <- as.numeric(UN_TB1$TIME_DIFF)
+
+#view(UN_TB1 %>% slice(1:20))         
+#view((substr(UN_TB1$END_TIME,1,1)) )
+#view((as.numeric(hms(UN_TB1$END_TIME))))
+class((as.numeric(hms(UN_TB1$END_TIME))))
+class(substr(UN_TB1$END_TIME,1,1))
+
+
+#CREATE NEW COLUMN RIDE TIME in minutes to resolve the issue of negative Time differences
+UN_TB1<- UN_TB1 %>% mutate(RIDE_TIME_mins = 
+         if_else (TIME_DIFF < 0 & (substr(END_TIME,1,2)) == "00",1440+(as.numeric(hms(END_TIME))/60)-(as.numeric(hms(START_TIME))/60),
+                  if_else (TIME_DIFF<0&(substr((END_TIME),1,2))!="00",1440-(as.numeric(hms(START_TIME))/60)+(as.numeric(hms(END_TIME))/60),TIME_DIFF )))
+
+
+
+#DROP COLUMN TIME_DIFF1
+
+UN_TB1 <- UN_TB1 %>% select(-TIME_DIFF1)
+
+# GROUP THE ABERAGE RIDE TIME IN mins  BY MEMBER_CASUAL AND BY SEASON 
+RIDE_MEMBER_SEASONS <- UN_TB1 %>% group_by(MEMBER_CASUAL,SEASON) %>%summarise(AVG_RIDE_TIME_mins = mean(RIDE_TIME_mins)) 
+print(RIDE_MEMBER_SEASONS)
+
+#MEMBER_CASUAL SEASON    AVG_RIDE_TIME
+#casual	      Fall	      21.80443		
+#casual	      Spring	    22.66936		
+#casual	      Summer	    24.45163		
+#casual	      Winter	    16.38683		
+#member	      Fall	      11.91252		
+#member	      Spring	    11.73512		
+#member	      Summer	    13.20074		
+#member	      Winter	    10.40276	
+
+
+RIDE_MEMBER_SEASONS <- UN_TB1 %>% group_by(MEMBER_CASUAL,SEASON) %>%summarise(Total_RIDE_TIME_mins = sum(RIDE_TIME_mins)) 
+print(RIDE_MEMBER_SEASONS)
+
+#MEMBER_CASUAL   SEASON     Total_RIDE_TIME_mins
+#casual	         Fall	        8707730		
+#casual	         Spring	      7579909		
+#casual	         Summer	      17090151		
+#casual	         Winter	      1623656		
+#member	         Fall	        9361467		
+#member	         Spring	      7668892		
+#member	         Summer	      13130526		
+#member	         Winter	      3806368	
+
+
+UN_TB1 <- UN_TB1 %>%  mutate(START_OF_WEEK = floor_date(as.Date(START_DATE),"week"))
+
+#Creating a new dataframe with Casual members only by filtering out members
+UNI_Casual2 <-UN_TB1 %>% filter(MEMBER_CASUAL=="casual")
+
+
+#Calculate summary statistics for the numeric column RIDE_TIME_mins 
+UNI_Casual2 %>%  summarise(across(RIDE_TIME_mins,list(mean=mean,
+                                                      median= median,
+                                                      min=min,
+                                                      max=max,
+                                                      sd=sd))) 
+
+
+#RESULTS
+
+# RIDE_TIME_mins_mean  RIDE_TIME_mins_median  RIDE_TIME_mins_min   RIDE_TIME_mins_max     RIDE_TIME_mins_sd
+#     22.85072	              12.75	                   0	                1439.983	           48.69362
+
+
+
+
+
+
+
+#Creating a new dataframe with Casual members only by filtering out members
+UNI_member2 <-UN_TB1 %>% filter(MEMBER_CASUAL=="member")
+
+
+#Calculate summary statistics for the numeric column RIDE_TIME_mins 
+UNI_member2 %>%  summarise(across(RIDE_TIME_mins,list(mean=mean,
+                                                      median= median,
+                                                      min=min,
+                                                      max=max,
+                                                      sd=sd))) 
+
+
+#RIDE_TIME_mins_mean  RIDE_TIME_mins_median  RIDE_TIME_mins_min RIDE_TIME_mins_max     RIDE_TIME_mins_sd
+#  12.13146	              8.616667	          0	                  1439.983	                  21.98801
+
+
+
+#Grouping Total Ride time by MEMBER_CASUAL and Start of week to obtain a week view of total rides by each type of member in 2023
+#A line graph will be constructed from this ,with dates in order.
+
+RIDE_TIME_START_DAY <- UN_TB1 %>% group_by(MEMBER_CASUAL,START_OF_WEEK) %>%summarise(Total_RIDE_TIME_mins = sum(RIDE_TIME_mins)) 
+print(RIDE_TIME_START_DAY)
+
+
+
+# Ride number Per Week grouped by MEMBER_CASUAL
+
+
+Count<- UN_TB1 %>% group_by(MEMBER_CASUAL,START_OF_WEEK) %>% count((RIDE_ID))
+print(Count)
+
+ RIDE_NUMBER_PER_WEEK <- RIDE_NUMBER_PER_WEEK %>% group_by(MEMBER_CASUAL,START_OF_WEEK) %>% summarise(sum(n))
+print( RIDE_NUMBER_PER_WEEK)
+
+
+                
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+
