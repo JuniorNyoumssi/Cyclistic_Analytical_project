@@ -11,10 +11,10 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 
 ```{r}
 
-# Cyclistic is a successful bike_share offering company which has the desire to convert Casual users of bikes into annual members due to the fact that Annual members are more profitable than casual member. The business goal is therefore to convert as many casual users into annual members. As part of the goal attainment , the duty that was assigned to me is to identify How annual members and casual riders use Cyclist bike differently.
+Cyclistic is a successful bike_share offering company which has the desire to convert Casual users of bikes into annual members due to the fact that Annual members are more profitable than casual member. The business goal is therefore to convert as many casual users into annual members. As part of the goal attainment , the duty that was assigned to me is to identify How annual members and casual riders use Cyclist bike differently.
 
-#Therefore with the data sets I have, I will be using R studio to carry out data cleaning ,Exploratory data analysis and Explanatory
-#data analysis, to be able to identify trends in the data, and develop powerful insights using clear dashboards that will drive desicion making.
+Therefore with the data sets I have, I will be using R studio to carry out data cleaning ,Exploratory data analysis and Explanatory
+data analysis, to be able to identify trends in the data, and develop powerful insights using clear dashboards that will drive desicion making.
 
 
 install.packages('tidyverse')
@@ -40,7 +40,7 @@ df_202310<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202310-divvy-tr
 df_202311<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202311-divvy-tripdata.csv")
 df_202312<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202312-divvy-tripdata.csv")
 
-#view(df_202301)
+view(df_202301)
 
 # DATASETS MERGING
 
@@ -48,7 +48,7 @@ union_table <- bind_rows(df_202301,df_202302,df_202303,df_202304,df_202305,df_20
 
 # Identify datatype of the columns
 
-#glimpse(union_table)
+glimpse(union_table)
 
 #Coverting member_casual into Factor data type
 
@@ -86,7 +86,7 @@ union_table <- union_table %>% mutate(season=case_when(between(as.Date(start_dat
 #Changing the size of the column names
 
 union_table <- rename_with(union_table,toupper)
-#view(union_table %>% slice(1:5))
+view(union_table %>% slice(1:5))
 
 #Creating a new table and droppung duplicates
 
@@ -112,7 +112,7 @@ union_table1 <- union_table1 %>% mutate(time_diff=difftime(END_TIME,START_TIME,u
 
 
 
-#view(union_table1 %>% slice(1:5))
+view(union_table1 %>% slice(1:5))
 
 # Separating the time portion from the date portion in the START_TIME and END_TIME 
 #at columns
@@ -122,7 +122,7 @@ union_table1 <- union_table1 %>% separate(END_TIME,into = c("end_date","end_time
                                         sep=" ")
 
 
-#view(union_table1 %>% slice(1:5))
+view(union_table1 %>% slice(1:5))
 class(union_table1$time_diff)
 
 #Deleting Columns start_date and end_date from table
@@ -133,35 +133,35 @@ union_table1 <- rename_with(union_table1,toupper)
 #Calculating the week day frequencies and creating a column DAY_COUNTS to store the frequencies as per the membership_type
 
 union_table2 <- union_table1%>%group_by(MEMBER_CASUAL,DAY_OF_WEEK)%>%count(RIDE_ID,name="RIDE_NUMBER_WEEKDAY")
-#view(union_table2)
+view(union_table2)
 
 
-#UN_TB_FIN <- union_table1 %>% mutate(DAY_COUNTS = case_when(MEMBER_CASUAL=="member"&DAY_OF_WEEK=="Friday"~531432,
-#                                       MEMBER_CASUAL=="member"&DAY_OF_WEEK=="Monday"~494435,
-#                                       MEMBER_CASUAL=="member" & DAY_OF_WEEK=="Tuesday"~576588,
-#                                       MEMBER_CASUAL=="member"&DAY_OF_WEEK=="Wednesday"~586294,
-#                                       MEMBER_CASUAL=="member" &DAY_OF_WEEK=="Thursday"~589420,
-#                                       MEMBER_CASUAL=="member" &DAY_OF_WEEK=="Saturday"~472696,
-#                                       MEMBER_CASUAL=="member" & DAY_OF_WEEK=="Sunday"~408715,
-#                                       MEMBER_CASUAL=="casual" & DAY_OF_WEEK=="Friday"~311081,
-#                                       MEMBER_CASUAL=="casual" & DAY_OF_WEEK=="Monday"~234198,
-#                                       MEMBER_CASUAL=="casual" &DAY_OF_WEEK=="Tuesday"~245604,
-#                                       MEMBER_CASUAL=="casual"&DAY_OF_WEEK=="Wednesday"~248568,
-#                                       MEMBER_CASUAL=="casual"&DAY_OF_WEEK=="Thursday"~269916,
-#                                       MEMBER_CASUAL=="casual"&DAY_OF_WEEK=="Saturday"~409415,
-#                                       MEMBER_CASUAL=="casual"&DAY_OF_WEEK=="Sunday"~334525))
+UN_TB_FIN <- union_table1 %>% mutate(DAY_COUNTS = case_when(MEMBER_CASUAL=="member"&DAY_OF_WEEK=="Friday"~531432,
+                                       MEMBER_CASUAL=="member"&DAY_OF_WEEK=="Monday"~494435,
+                                       MEMBER_CASUAL=="member" & DAY_OF_WEEK=="Tuesday"~576588,
+                                       MEMBER_CASUAL=="member"&DAY_OF_WEEK=="Wednesday"~586294,
+                                       MEMBER_CASUAL=="member" &DAY_OF_WEEK=="Thursday"~589420,
+                                       MEMBER_CASUAL=="member" &DAY_OF_WEEK=="Saturday"~472696,
+                                       MEMBER_CASUAL=="member" & DAY_OF_WEEK=="Sunday"~408715,
+                                       MEMBER_CASUAL=="casual" & DAY_OF_WEEK=="Friday"~311081,
+                                       MEMBER_CASUAL=="casual" & DAY_OF_WEEK=="Monday"~234198,
+                                       MEMBER_CASUAL=="casual" &DAY_OF_WEEK=="Tuesday"~245604,
+                                       MEMBER_CASUAL=="casual"&DAY_OF_WEEK=="Wednesday"~248568,
+                                       MEMBER_CASUAL=="casual"&DAY_OF_WEEK=="Thursday"~269916,
+                                       MEMBER_CASUAL=="casual"&DAY_OF_WEEK=="Saturday"~409415,
+                                       MEMBER_CASUAL=="casual"&DAY_OF_WEEK=="Sunday"~334525))
 
 
 
-#view(UN_TB_FIN %>% slice(1:20))
+view(UN_TB_FIN %>% slice(1:20))
 
 #Exporting dataset into CSV format
 
-#write.csv(UN_TB_FIN,"C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/Full_dataset1.csv",row.names=FALSE)  
+write.csv(UN_TB_FIN,"C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/Full_dataset1.csv",row.names=FALSE)  
 
 
 #UN_TBFN_1 <- as.data.frame(UN_TB_FIN)
-#write_xlsx(UN_TBFN_1,path ="C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/" )
+write_xlsx(UN_TBFN_1,path ="C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/" )
 
 # MEMBERS
 
@@ -169,11 +169,12 @@ union_table2 <- union_table1%>%group_by(MEMBER_CASUAL,DAY_OF_WEEK)%>%count(RIDE_
 #Filtering the dataframe and seperating it into two separate frames for further analysis and comparison
 
 UNI_Member <-UN_TB_FIN %>% filter(MEMBER_CASUAL=="member")
-#view(UNI_Member %>% slice(1:20))
+view(UNI_Member %>% slice(1:20))
 UNI_Member %>%summarize()
-#UNI_Member %>% skim_without_charts()
+UNI_Member %>% skim_without_charts()
 
 #Total Count of Members is 3659580
+
 total_rows <- nrow(UNI_Member)
 total_rows
 
@@ -197,13 +198,13 @@ weekday_frequency %>%  arrange(.,n)
 
 
     # RESULTS
-#Sunday	    408715			
-#Saturday	  472696			
-#Monday	    494435			
-#Friday	    531432			
-#Tuesday	  576588			
-#Wednesday	586294			
-#Thursday	  589420			
+#Sunday	         408715			
+#Saturday	 472696			
+#Monday	         494435			
+#Friday	         531432			
+#Tuesday	 576588			
+#Wednesday	 586294			
+#Thursday	 589420			
 
 
 
@@ -214,20 +215,20 @@ weekday_frequency_RIDES %>%  arrange(.,n)
 
 
        # RESULTS
-#Sunday	  electric_bike	201243		
-#Sunday	  classic_bike	207472		
-#Saturday	classic_bike	235657		
-#Saturday	electric_bike	237039		
-#Monday	  electric_bike	243708		
-#Monday	  classic_bike	250727		
-#Friday	  classic_bike	256787		
-#Friday	  electric_bike	274645		
-#Tuesday	electric_bike	286514		
-#Thursday	classic_bike	288303
-#Wednesda classic_bike	288992		
-#Tuesday	classic_bike	290074		
-#Wednesda electric_bike	297302		
-#Thursday	electric_bike	301117		
+#Sunday	      electric_bike	201243		
+#Sunday	      classic_bike	207472		
+#Saturday     classic_bike	235657		
+#Saturday     electric_bike	237039		
+#Monday	      electric_bike	243708		
+#Monday	      classic_bike	250727		
+#Friday	      classic_bike	256787		
+#Friday	      electric_bike	274645		
+#Tuesday      electric_bike	286514		
+#Thursday     classic_bike	288303
+#Wednesda     classic_bike	288992		
+#Tuesday      classic_bike	290074		
+#Wednesda     electric_bike	297302		
+#Thursday     electric_bike	301117		
  
  
 
@@ -238,10 +239,10 @@ Season_frequency <- UNI_Member %>%  group_by(SEASON) %>% count(SEASON)
 Season_frequency %>%  arrange(.,n)
 
    #RESULTS
-#Winter	470006			
-#Spring	846233			
-#Fall	  1028523			
-#Summer	1314818	
+#Winter	   470006			
+#Spring	   846233			
+#Fall	   1028523			
+#Summer	   1314818	
 
 
 
@@ -254,20 +255,20 @@ Season_frequency_RIDES %>%  arrange(.,n)
 
    # RESULTS
 
-#Winter	classic_bike	234742		
-#Winter	electric_bike	235264		
-#Spring	classic_bike	385568		
-#Spring	electric_bike	460665		
+#Winter	  classic_bike	234742		
+#Winter	  electric_bike	235264		
+#Spring	  classic_bike	385568		
+#Spring	  electric_bike	460665		
 #Fall	  electric_bike	494963		
 #Fall	  classic_bike	533560		
-#Summer	electric_bike	650676		
-#Summer	classic_bike	664142	
+#Summer	  electric_bike	650676		
+#Summer	  classic_bike	664142	
 
 
 #CASUALS
 
 UNI_Casual <-UN_TB_FIN %>% filter(MEMBER_CASUAL=="casual")
-#view(UNI_Casual %>% slice(1:20))
+view(UNI_Casual %>% slice(1:20))
 
 
 
@@ -296,12 +297,12 @@ weekday_frequency %>%  arrange(.,n)
 
  # RESULTS
 
-#Monday	    234198			
+#Monday	          234198			
 #Tuesday	  245604			
-#Wednesday	248568			
+#Wednesday	  248568			
 #Thursday	  269916			
-#Friday	    311081			
-#Sunday	    334525			
+#Friday	          311081			
+#Sunday	          334525			
 #Saturday	  409415	
 
 #Ride count by ride type under each week day
@@ -310,32 +311,32 @@ weekday_frequency %>%  arrange(.,n)
 
 weekday_frequency_RIDES <- UNI_Casual %>%  group_by(DAY_OF_WEEK,RIDEABLE_TYPE) %>% count(RIDEABLE_TYPE)
 weekday_frequency_RIDES %>%  arrange(.,n)
-#view(A)
+
 
 
          # RESULTS
 
-#Wednesday	docked_bike	7684		
-#Tuesday	 docked_bike	8451		
-#Thursday	 docked_bike	8654		
-#Monday	  docked_bike	8895		
-#Friday	  docked_bike	11142		
-#Sunday	  docked_bike	14488		
-#Saturday	docked_bike	16810		
-#Monday	  classic_bike	96600		
-#Wednesday	classic_bike	98213		
-#Tuesday	  classic_bike	99275
-#Thursday	  classic_bike	107515		
-#Friday	    classic_bike	127229		
-#Monday	    electric_bike	128703		
-#Tuesday	  electric_bike	137878		
-#Wednesday	electric_bike	142671		
-#Thursday	  electric_bike	153747		
-#Sunday	    classic_bike	154496		
-#Sunday	    electric_bike	165541		
-#Friday	    electric_bike	172710		
-#Saturday	  classic_bike	189844
-#Saturday	  electric_bike	202761	
+#Wednesday   docked_bike	7684		
+#Tuesday     docked_bike	8451		
+#Thursday    docked_bike	8654		
+#Monday	     docked_bike	8895		
+#Friday	     docked_bike	11142		
+#Sunday	     docked_bike	14488		
+#Saturday    docked_bike	16810		
+#Monday	     classic_bike	96600		
+#Wednesday   classic_bike	98213		
+#Tuesday     classic_bike	99275
+#Thursday    classic_bike	107515		
+#Friday	     classic_bike	127229		
+#Monday	     electric_bike	128703		
+#Tuesday     electric_bike	137878		
+#Wednesday   electric_bike	142671		
+#Thursday    electric_bike	153747		
+#Sunday	     classic_bike	154496		
+#Sunday	     electric_bike	165541		
+#Friday	     electric_bike	172710		
+#Saturday    classic_bike	189844
+#Saturday    electric_bike	202761	
 
 # Ride count by SEASON
 
@@ -344,10 +345,10 @@ Season_frequency %>%  arrange(.,n)
 
   #RESULTS
 
-#Winter	134331			
-#Spring	442534			
+#Winter	  134331			
+#Spring	  442534			
 #Fall	  535699			
-#Summer	940743	
+#Summer	  940743	
 
 
 # Ride count by Rideable type under each Season
@@ -360,14 +361,14 @@ Season_frequency_RIDES %>%  arrange(.,n)
 #Winter	  docked_bike	  3833		
 #Spring	  docked_bike	  24412		
 #Summer	  docked_bike	  47879		
-#Winter	  classic_bike	49642		
-#Winter	  electric_bike	80856		
-#Spring	  classic_bike	160407		
-#Fall	    classic_bike	256552		
-#Spring	  electric_bike	257715		
-#Fall	    electric_bike	279147		
-#Summer	  classic_bike	406571	
-#Summer	  electric_bike	486293	
+#Winter	  classic_bike	  49642		
+#Winter	  electric_bike	  80856		
+#Spring	  classic_bike	  160407		
+#Fall	  classic_bike    256552		
+#Spring	  electric_bike	  257715		
+#Fall	  electric_bike	  279147		
+#Summer	  classic_bike	  406571	
+#Summer	  electric_bike	  486293	
 
 
 
@@ -379,27 +380,27 @@ class(UN_TB_FIN$TIME_DIFF1)
 # Identified empty rows under START_STATION_ID and END_STATION_ID columns
 
 UNi_1 <- UN_TB_FIN[UN_TB_FIN$TIME_DIFF1 < 0,]
-#view(UNi_1)
+view(UNi_1)
 
 # FILTER OUT THE EMPTY ROWS FROM THE TABLE UN_TB_FIN
 
 UN_TB1 <- UN_TB_FIN %>%  filter(START_STATION_ID != "" & END_STATION_ID != "")
 UN_TB1 <- UN_TB1 %>% na.omit()
-#view(UN_TB1 %>% slice(1:20))
+view(UN_TB1 %>% slice(1:20))
 
 UNi_2 <- UN_TB1[UN_TB1$TIME_DIFF1 < 0,]
 #view(UNi_2)
 
 # EXPORTING INTO MULTIPLE SMALLER TABLES AS EXCEL DOESN'T ACCEPT MORE THAN 1000000 ROWS OF  DATA
 
-#smaller_tables <- split(UN_TB1,rep(1:ceiling(nrow(UN_TB1)/1000000),each=1000000,length.out=nrow(UN_TB1)))
-#num_rows <- sapply(smaller_tables,nrow)
-#print(num_rows)
+smaller_tables <- split(UN_TB1,rep(1:ceiling(nrow(UN_TB1)/1000000),each=1000000,length.out=nrow(UN_TB1)))
+num_rows <- sapply(smaller_tables,nrow)
+print(num_rows)
 
-#for(i in 1:length(smaller_tables)){
-#  write_xlsx(smaller_tables[[i]],
-#             paste0("table_",i,".xlsx"))
-#}
+for(i in 1:length(smaller_tables)){
+  write_xlsx(smaller_tables[[i]],
+             paste0("table_",i,".xlsx"))
+}
 
 #UN_TBFN_1 <- as.data.frame(UN_TB_FIN)
 #write_xlsx(UN_TBFN_1,path ="C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/" )
@@ -409,9 +410,9 @@ UNi_2 <- UN_TB1[UN_TB1$TIME_DIFF1 < 0,]
 class(UN_TB1$RIDE_TIME_mins)
 UN_TB1$TIME_DIFF <- as.numeric(UN_TB1$TIME_DIFF)
 
-#view(UN_TB1 %>% slice(1:20))         
-#view((substr(UN_TB1$END_TIME,1,1)) )
-#view((as.numeric(hms(UN_TB1$END_TIME))))
+view(UN_TB1 %>% slice(1:20))         
+view((substr(UN_TB1$END_TIME,1,1)) )
+view((as.numeric(hms(UN_TB1$END_TIME))))
 class((as.numeric(hms(UN_TB1$END_TIME))))
 class(substr(UN_TB1$END_TIME,1,1))
 
@@ -473,7 +474,7 @@ UNI_Casual2 %>%  summarise(across(RIDE_TIME_mins,list(mean=mean,
 #RESULTS
 
 # RIDE_TIME_mins_mean  RIDE_TIME_mins_median  RIDE_TIME_mins_min   RIDE_TIME_mins_max     RIDE_TIME_mins_sd
-#     22.85072	              12.75	                   0	                1439.983	           48.69362
+#     22.85072	              12.75	                   0	          1439.983	           48.69362
 
 
 
@@ -494,7 +495,7 @@ UNI_member2 %>%  summarise(across(RIDE_TIME_mins,list(mean=mean,
 
 
 #RIDE_TIME_mins_mean  RIDE_TIME_mins_median  RIDE_TIME_mins_min RIDE_TIME_mins_max     RIDE_TIME_mins_sd
-#  12.13146	              8.616667	          0	                  1439.983	                  21.98801
+#  12.13146	              8.616667	          0	               1439.983	          21.98801
 
 
 
@@ -506,7 +507,7 @@ print(RIDE_TIME_START_DAY)
 
 
 
-# Ride number Per Week grouped by MEMBER_CASUAL
+# Ride count Per Week grouped by MEMBER_CASUAL
 
 
 Count<- UN_TB1 %>% group_by(MEMBER_CASUAL,START_OF_WEEK) %>% count((RIDE_ID))
