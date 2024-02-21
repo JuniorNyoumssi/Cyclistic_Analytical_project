@@ -19,4 +19,4 @@ annual members and casual riders differ, why casual riders would buy a membershi
 digital media could affect their marketing tactics. Moreno and her team are interested in
 analyzing the Cyclistic historical bike trip data to identify trends.
 
-The goal of this project is mainly to identify and describe how casual riders and members defer.
+The goal of this project is mainly to identify and describe how casual riders and members use cyclistic bikes differently.
