@@ -1,3 +1,5 @@
+--Union 5 excel files
+
 CREATE TABLE full_dataset1 AS
 SELECT *
 FROM table_1
