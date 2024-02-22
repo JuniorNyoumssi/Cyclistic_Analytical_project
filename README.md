@@ -20,3 +20,24 @@ digital media could affect their marketing tactics. Moreno and her team are inte
 analyzing the Cyclistic historical bike trip data to identify trends.
 
 The goal of this project is mainly to identify and describe how casual riders and members use cyclistic bikes differently.
+
+Project Setting:
+We are given 12 Excel workbooks to work with, these workbooks each contain data for a single  month of the year 2023
+Each workbook contains about 200,000 observations and 13 columns
+
+Column names                       Description                                                                                                                   Data type
+ride_id	                         The identification number of the ride                                                                                          Alphanumeric
+rideable_type	                   The type of bike : Electric, classic,docked                                                                                    Text
+started_at	                     The time at which the ride started                                                                                             Date/Text
+ended_at	                       The time at which the ride ended                                                                                               Date/text
+start_station_name	             The station name where the ride started                                                                                        text
+start_station_id	               The Identification number of the start station, where the ride started                                                         Alphanumeric
+end_station_name	               The name of the end station which is where the ride ended                                                                      Text
+end_station_id	                 The identification number of the end station, which is the station where the riders drop the bikes                              Alphanumeric
+start_lat	                       The start Latitude of the ride                                                                                                  Alphanumeric
+start_lng	                       The start Longitude of the ride                                                                                                 Alphanumeric
+end_lat	                         The end latitude of the ride                                                                                                    Alphanumeric
+end_lng	                         The end longitude of the ride                                                                                                   Alphanumeric
+member_casual                    The user category, which can be either a Casual user , or an Annual member                                                      Text
+
+
