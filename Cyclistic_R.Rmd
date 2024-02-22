@@ -42,7 +42,7 @@ df_202312<-read.csv("C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/202312-divvy-tr
 
 view(df_202301)
 
-# DATASETS MERGING
+#DATASETS MERGING
 
 union_table <- bind_rows(df_202301,df_202302,df_202303,df_202304,df_202305,df_202306,df_202307,df_202308,df_202309,df_202310,df_202311,df_202312)
 
@@ -160,7 +160,7 @@ view(UN_TB_FIN %>% slice(1:20))
 write.csv(UN_TB_FIN,"C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/Full_dataset1.csv",row.names=FALSE)  
 
 
-#UN_TBFN_1 <- as.data.frame(UN_TB_FIN)
+UN_TBFN_1 <- as.data.frame(UN_TB_FIN)
 write_xlsx(UN_TBFN_1,path ="C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/" )
 
 # MEMBERS
@@ -389,7 +389,7 @@ UN_TB1 <- UN_TB1 %>% na.omit()
 view(UN_TB1 %>% slice(1:20))
 
 UNi_2 <- UN_TB1[UN_TB1$TIME_DIFF1 < 0,]
-#view(UNi_2)
+view(UNi_2)
 
 # EXPORTING INTO MULTIPLE SMALLER TABLES AS EXCEL DOESN'T ACCEPT MORE THAN 1000000 ROWS OF  DATA
 
@@ -402,8 +402,8 @@ for(i in 1:length(smaller_tables)){
              paste0("table_",i,".xlsx"))
 }
 
-#UN_TBFN_1 <- as.data.frame(UN_TB_FIN)
-#write_xlsx(UN_TBFN_1,path ="C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/" )
+UN_TBFN_1 <- as.data.frame(UN_TB_FIN)
+write_xlsx(UN_TBFN_1,path ="C:/Users/nyoum/OneDrive/Desktop/Cyclistic_1/" )
 
 #CONVERTING THE DATATYPE OF THE TIME_DIFF COLUMN TO NUMERIC
 
