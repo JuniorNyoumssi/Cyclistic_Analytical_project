@@ -26,8 +26,8 @@ We are given 12 Excel workbooks to work with, these workbooks each contain data 
 Each workbook contains about 200,000 observations and 13 columns
 
 
-The lines below give the column names, Description ,and data type of each column accordingly, a little bit hard to read but this is the best 
-format I could use on this platform
+The lines below give the column names,Description ,and data type of each column  in the form ; column names [Description](data type) accordingly, 
+a little bit hard to read but this is the best format I could use on this platform
 
 ride_id	[The identification number of the ride] (Alphanumeric) ,
 rideable_type [The type of bike : Electric, classic,docked] (Text), 
